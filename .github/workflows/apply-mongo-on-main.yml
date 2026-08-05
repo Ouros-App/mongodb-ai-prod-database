@@ -1,0 +1,25 @@
+name: Apply MongoDB on main
+permissions:
+  contents: read
+concurrency:
+  group: apply-mongodb-main
+  cancel-in-progress: false
+on:
+  push:
+    branches: [main]
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -r requirements.txt
+      - run: python scripts/apply_mongo.py
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_TLS: "true"
+          MONGODB_TLS_CA_FILE: ${{ secrets.MONGODB_TLS_CA_FILE }}
