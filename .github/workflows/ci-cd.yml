@@ -110,3 +110,4 @@ jobs:
           test -f config.yaml
           test -f scripts/apply_mongo.py
           find mongo -type f -name '*.json' | sort | grep -q .
+# PR workflow validation
