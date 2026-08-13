@@ -5,7 +5,8 @@ on:
     types: [opened, synchronize, reopened, labeled]
     branches: [main]
   push:
-    branches: ["**"]
+    branches:
+      - main
 permissions:
   contents: read
   checks: write
