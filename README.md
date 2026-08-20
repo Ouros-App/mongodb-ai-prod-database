@@ -1,15 +1,94 @@
-# MongoDB database template
+# mongodb-prod-database
 
-Template de banco MongoDB versionado por comandos JSON.
+Template para versionamento e aplicação de comandos JSON em MongoDB no repositório destinado ao ambiente de produção.
 
-## Uso
+## Status e escopo
+
+O repositório contém um executor Python, configuração de conexão, controle de versões e um script JSON configurado em `mongo/colecoes.json`. Esse arquivo atualmente contém uma lista vazia (`[]`), portanto não há comandos de banco definidos no estado atual do repositório.
+
+A aplicação automática está definida em `.github/workflows/apply-mongo-on-main.yml` e é disparada por push em `main`.
+
+## Componentes
+
+- `scripts/apply_mongo.py`: lê a configuração, conecta ao MongoDB, executa os comandos JSON e registra o estado de cada script.
+- `config.yaml`: define a URI, TLS, caminho dos scripts, coleção de versões e ordem de execução.
+- `mongo/colecoes.json`: script JSON atualmente configurado, em modo `on_change`.
+- `tests/test_apply_mongo.py`: testa a expansão de variáveis e a retomada de script não transacional após falha.
+- `.env.example`: exemplo das variáveis de conexão.
+
+O executor usa a coleção `controle_scripts_mongo` para acompanhar checksums e progresso, `controle_contadores` para incrementar a versão e `controle_versoes` para registrar o commit e o comentário da execução.
+
+## Pré-requisitos
+
+- Python 3.12, usado pelos workflows.
+- Uma instância MongoDB acessível por uma URI que inclua o banco no caminho, pois a configuração não define `database.name` e o executor usa o banco padrão da URI.
+- Certificado CA quando a conexão TLS exigir um arquivo configurado em `MONGODB_TLS_CA_FILE`.
+
+As dependências Python estão fixadas em `requirements.txt`:
+
+- `pymongo==4.10.1`
+- `PyYAML==6.0.2`
+- `python-dotenv==1.0.1`
+
+## Instalação e configuração
+
+Na raiz do repositório:
 
 ```bash
 cp .env.example .env
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
+```
+
+Configure no arquivo `.env`:
+
+- `MONGODB_URI`
+- `MONGODB_TLS`
+- `MONGODB_TLS_CA_FILE`
+
+A configuração expande essas variáveis em `config.yaml`. Para adicionar comandos, edite um arquivo JSON em `mongo/` e registre-o em `database.execution_order`. Os modos aceitos são `always`, `on_change`, `once` e `never`.
+
+Cada entrada é transacional por padrão. Uma entrada não transacional precisa declarar `idempotent: true`.
+
+## Execução
+
+```bash
 python scripts/apply_mongo.py
 ```
 
-Os scripts ficam em `mongo/` e a ordem fica em `config.yaml`. Cada execução registra uma versão com commit e comentário. Os modos são `always`, `on_change`, `once` e `never`.
+O executor lê cada entrada na ordem configurada e chama o comando MongoDB correspondente. Em entradas transacionais, os comandos e o registro de controle são executados em uma transação. Entradas não transacionais registram o próximo comando para permitir retomada após uma falha.
 
-No GitHub Actions, configure `MONGODB_HOST`, `MONGODB_PORT`, `MONGODB_DB`, `MONGODB_USER`, `MONGODB_PASSWORD` e `MONGODB_AUTH_DB` como secrets. O deploy roda somente em push para `main`.
+No GitHub Actions, o workflow de aplicação usa os secrets `MONGODB_URI` e `MONGODB_TLS_CA_FILE`, força `MONGODB_TLS=true` e executa o mesmo script após instalar as dependências.
+
+## Testes e qualidade
+
+Execute as mesmas verificações principais do CI com:
+
+```bash
+python -m py_compile scripts/apply_mongo.py
+python -m unittest discover -s tests -v
+```
+
+O workflow `.github/workflows/ci-cd.yml` também valida a existência de `config.yaml`, do executor e de pelo menos um arquivo JSON em `mongo/`.
+
+## Estrutura do projeto
+
+```text
+.
+├── .env.example
+├── config.yaml
+├── requirements.txt
+├── mongo/
+│   └── colecoes.json
+├── scripts/
+│   └── apply_mongo.py
+└── tests/
+    └── test_apply_mongo.py
+```
+
+## Contribuição
+
+Ao adicionar ou alterar comandos, mantenha a ordem em `config.yaml`, declare corretamente o modo de execução e respeite a exigência de idempotência para scripts não transacionais. Execute as verificações locais antes de enviar a alteração.
+
+## Licença
+
+Este projeto está sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE).
