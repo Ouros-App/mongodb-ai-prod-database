@@ -30,6 +30,8 @@ A aplicação automática está definida em `.github/workflows/apply-mongo-on-ma
 
 O executor usa a coleção `controle_scripts_mongo` para acompanhar checksums e progresso, `controle_contadores` para incrementar a versão e `controle_versoes` para registrar o commit e o comentário da execução.
 
+Antes de aplicar índices únicos, o executor verifica se os dados existentes têm chaves duplicadas. Se encontrar conflito, a execução falha sem aplicar o script, permitindo corrigir os dados antes do deploy.
+
 ## Pré-requisitos
 
 - Python 3.12, usado pelos workflows.

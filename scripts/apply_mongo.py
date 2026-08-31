@@ -94,6 +94,37 @@ def apply_scripts(root: Path, cfg: dict, db, commit_id: str) -> None:
         print(f"[RUN] {identity}: {mode}")
 
 
+def validate_unique_indexes(root: Path, cfg: dict, db) -> None:
+    """Falha antes da aplicação se dados existentes violarem índices únicos."""
+    for path, _mode, _transactional, _idempotent in script_entries(root, cfg):
+        commands = json.loads(path.read_text(encoding="utf-8"))
+        commands = commands if isinstance(commands, list) else [commands]
+        for command in commands:
+            if command.get("createIndexes") is None:
+                continue
+            collection_name = command["createIndexes"]
+            for index in command.get("indexes", []):
+                if not index.get("unique"):
+                    continue
+                keys = index.get("key", {})
+                group_id = {field: f"${field}" for field in keys}
+                duplicate = next(
+                    db[collection_name].aggregate(
+                        [
+                            {"$group": {"_id": group_id, "count": {"$sum": 1}}},
+                            {"$match": {"count": {"$gt": 1}}},
+                            {"$limit": 1},
+                        ]
+                    ),
+                    None,
+                )
+                if duplicate is not None:
+                    raise ValueError(
+                        f"Dados duplicados impedem o indice unico {index['name']} "
+                        f"na colecao {collection_name}."
+                    )
+
+
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
     load_dotenv(root / ".env")
@@ -112,6 +143,7 @@ def main() -> None:
     commit_message = os.getenv("GITHUB_COMMIT_MESSAGE") or git_value(root, "log", "-1", "--pretty=%B")
     if commit_id == "unknown":
         raise RuntimeError("Nao foi possivel identificar o commit atual.")
+    validate_unique_indexes(root, cfg, db)
     apply_scripts(root, cfg, db, commit_id)
     version = db["controle_contadores"].find_one_and_update({"_id": "versao"}, {"$inc": {"value": 1}}, upsert=True, return_document=ReturnDocument.AFTER)["value"]
     db[db_cfg["version_collection"]].insert_one({"versao": version, "commit_id": commit_id, "comentario_commit": commit_message})
