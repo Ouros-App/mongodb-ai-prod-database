@@ -96,7 +96,9 @@ def apply_scripts(root: Path, cfg: dict, db, commit_id: str) -> None:
 
 def validate_unique_indexes(root: Path, cfg: dict, db) -> None:
     """Falha antes da aplicação se dados existentes violarem índices únicos."""
-    for path, _mode, _transactional, _idempotent in script_entries(root, cfg):
+    for path, mode, _transactional, _idempotent in script_entries(root, cfg):
+        if mode == "never":
+            continue
         commands = json.loads(path.read_text(encoding="utf-8"))
         commands = commands if isinstance(commands, list) else [commands]
         for command in commands:
