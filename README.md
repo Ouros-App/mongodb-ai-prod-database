@@ -1,13 +1,13 @@
-# mongodb-prod-database
+# mongodb-ai-prod-database
 
 <!-- REPO-METADATA:START -->
 <div align="center">
 
-[![Repo Size](https://img.shields.io/github/repo-size/Ouros-App/mongodb-prod-database?style=flat-square&label=REPO%20SIZE)](https://github.com/Ouros-App/mongodb-prod-database)
-[![Languages](https://img.shields.io/github/languages/count/Ouros-App/mongodb-prod-database?style=flat-square&label=LANGUAGES)](https://github.com/Ouros-App/mongodb-prod-database/languages)
-[![Forks](https://img.shields.io/github/forks/Ouros-App/mongodb-prod-database?style=flat-square&label=FORKS)](https://github.com/Ouros-App/mongodb-prod-database/network/members)
-[![Issues](https://img.shields.io/github/issues/Ouros-App/mongodb-prod-database?style=flat-square&label=ISSUES)](https://github.com/Ouros-App/mongodb-prod-database/issues)
-[![Pull Requests](https://img.shields.io/github/issues-pr/Ouros-App/mongodb-prod-database?style=flat-square&label=PULL%20REQUESTS)](https://github.com/Ouros-App/mongodb-prod-database/pulls)
+[![Repo Size](https://img.shields.io/github/repo-size/Ouros-App/mongodb-ai-prod-database?style=flat-square&label=REPO%20SIZE)](https://github.com/Ouros-App/mongodb-ai-prod-database)
+[![Languages](https://img.shields.io/github/languages/count/Ouros-App/mongodb-ai-prod-database?style=flat-square&label=LANGUAGES)](https://github.com/Ouros-App/mongodb-ai-prod-database/languages)
+[![Forks](https://img.shields.io/github/forks/Ouros-App/mongodb-ai-prod-database?style=flat-square&label=FORKS)](https://github.com/Ouros-App/mongodb-ai-prod-database/network/members)
+[![Issues](https://img.shields.io/github/issues/Ouros-App/mongodb-ai-prod-database?style=flat-square&label=ISSUES)](https://github.com/Ouros-App/mongodb-ai-prod-database/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/Ouros-App/mongodb-ai-prod-database?style=flat-square&label=PULL%20REQUESTS)](https://github.com/Ouros-App/mongodb-ai-prod-database/pulls)
 
 </div>
 <!-- REPO-METADATA:END -->
