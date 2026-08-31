@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts.apply_mongo import apply_scripts, load_config
+from scripts.apply_mongo import apply_scripts, load_config, validate_unique_indexes
 
 
 class ApplyMongoTest(unittest.TestCase):
@@ -57,6 +57,47 @@ class ApplyMongoTest(unittest.TestCase):
                 apply_scripts(root, cfg, db, "commit")
             apply_scripts(root, cfg, db, "commit")
             self.assertEqual(db.executed, [1, 2, 2])
+
+    def test_unique_indexes_reject_duplicate_existing_keys(self):
+        class Collection:
+            def aggregate(self, _pipeline):
+                return iter([{"count": 2}])
+
+        class Database:
+            def __getitem__(self, _name):
+                return Collection()
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            scripts = root / "mongo"
+            scripts.mkdir()
+            (scripts / "indexes.json").write_text(
+                '[{"createIndexes":"users","indexes":[{"key":{"user_id":1},"name":"user_id_1","unique":true}]}]',
+                encoding="utf-8",
+            )
+            cfg = {"database": {"scripts_path": "mongo", "execution_order": ["indexes.json"]}}
+
+            with self.assertRaisesRegex(ValueError, "Dados duplicados impedem"):
+                validate_unique_indexes(root, cfg, Database())
+
+    def test_unique_indexes_skip_disabled_scripts(self):
+        class Database:
+            def __getitem__(self, _name):
+                raise AssertionError("scripts disabled should not be inspected")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            scripts = root / "mongo"
+            scripts.mkdir()
+            (scripts / "indexes.json").write_text(
+                '[{"createIndexes":"users","indexes":[{"key":{"user_id":1},"name":"user_id_1","unique":true}]}]',
+                encoding="utf-8",
+            )
+            cfg = {"database": {"scripts_path": "mongo", "execution_order": [
+                {"file": "indexes.json", "mode": "never"}
+            ]}}
+
+            validate_unique_indexes(root, cfg, Database())
 
 
 if __name__ == "__main__":

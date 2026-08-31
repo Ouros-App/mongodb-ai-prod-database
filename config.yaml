@@ -1,6 +1,7 @@
 project: mongodb-database
 database:
   engine: mongodb
+  name: mongodb-ai-prod
   connection_url: ${MONGODB_URI}
   tls: ${MONGODB_TLS}
   tls_ca_file: ${MONGODB_TLS_CA_FILE}
@@ -9,3 +10,5 @@ database:
   execution_order:
     - file: colecoes.json
       mode: on_change
+      transactional: false
+      idempotent: true

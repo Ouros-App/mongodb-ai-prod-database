@@ -1,1 +1,64 @@
-[]
+[
+  {
+    "createIndexes": "user_memories",
+    "indexes": [
+      {
+        "key": {
+          "user_id": 1,
+          "memory": 1
+        },
+        "name": "user_id_1_memory_1",
+        "unique": true
+      },
+      {
+        "key": {
+          "user_id": 1,
+          "updated_at": -1
+        },
+        "name": "user_id_1_updated_at_-1"
+      }
+    ]
+  },
+  {
+    "createIndexes": "thread_owners",
+    "indexes": [
+      {
+        "key": {
+          "thread_id": 1
+        },
+        "name": "thread_id_1",
+        "unique": true
+      }
+    ]
+  },
+  {
+    "createIndexes": "checkpoints",
+    "indexes": [
+      {
+        "key": {
+          "thread_id": 1,
+          "checkpoint_ns": 1,
+          "checkpoint_id": -1
+        },
+        "name": "thread_id_1_checkpoint_ns_1_checkpoint_id_-1",
+        "unique": true
+      }
+    ]
+  },
+  {
+    "createIndexes": "checkpoint_writes",
+    "indexes": [
+      {
+        "key": {
+          "thread_id": 1,
+          "checkpoint_ns": 1,
+          "checkpoint_id": -1,
+          "task_id": 1,
+          "idx": 1
+        },
+        "name": "thread_id_1_checkpoint_ns_1_checkpoint_id_-1_task_id_1_idx_1",
+        "unique": true
+      }
+    ]
+  }
+]
